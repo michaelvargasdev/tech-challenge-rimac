@@ -1,0 +1,25 @@
+{
+  "name": "tech-challenge-rimac",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "author": "Michael Cristopher Vargas Melgar <michael.c.v.m.dev@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "jsonwebtoken": "^8.5.1",
+    "md5": "^2.3.0",
+    "uuidv4": "^6.2.4"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.778.0",
+    "jest": "^26.6.1"
+  }
+}

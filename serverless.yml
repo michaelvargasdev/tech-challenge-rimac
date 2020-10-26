@@ -1,0 +1,131 @@
+
+service: tech-challenge-rimac
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-east-2
+  environment:
+    TABLE_PLANET: ${self:custom.tablePlanet}
+    TABLE_AUTH: ${self:custom.tableAuth}
+    JWT_SECRET: security/jwt/jwt_secret.key
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: '*'
+
+custom:
+  tablePlanet: planet
+  tableAuth: auth
+
+functions:
+  authentication:
+    handler: handler/auth.authentication
+    events:
+      - http:
+          method: post
+          path: /auth/authentication
+          cors: true
+  authorization:
+    handler: handler/auth.authorization
+  resetApplication:
+    handler: handler/application.resetApplication
+    events:
+      - http:
+          method: get
+          path: /application/resetApplication
+          cors: true
+  findAllPlanet:
+    handler: handler/planet.findAll
+    events:
+      - http:
+          method: get
+          path: /planet
+          cors: true
+          authorizer: authorization
+  findOnePlanet:
+    handler: handler/planet.findOne
+    events:
+      - http:
+          method: get
+          path: /planet/{id}
+          cors: true
+          authorizer: authorization
+  createOnePlanet:
+    handler: handler/planet.createOne
+    events:
+      - http:
+          method: post
+          path: /planet
+          cors: true
+          authorizer: authorization
+  updateOnePlanet:
+    handler: handler/planet.updateOne
+    events:
+      - http:
+          method: put
+          path: /planet/{id}
+          cors: true
+          authorizer: authorization
+  deleteOnePlanet:
+    handler: handler/planet.deleteOne
+    events:
+      - http:
+          method: delete
+          path: /planet/{id}
+          cors: true
+          authorizer: authorization
+
+  findOnePeople:
+    handler: handler/people.findOne
+    events:
+      - http:
+          method: get
+          path: /people/{id}
+          cors: true
+          authorizer: authorization
+
+resources:
+  Resources:
+    MyDynamoDbTablePlanet:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePlanet}
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    MyDynamoDbTableUser:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableAuth}
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+          - AttributeName: userName
+            AttributeType: S
+          - AttributeName: password
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+        GlobalSecondaryIndexes:
+          - IndexName: userName-index
+            KeySchema:
+              - AttributeName: userName
+                KeyType: HASH
+              - AttributeName: password
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
